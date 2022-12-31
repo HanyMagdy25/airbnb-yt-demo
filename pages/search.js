@@ -3,8 +3,16 @@ import { useRouter } from "next/router";
 import React from "react";
 import Footer from "../components/Footer";
 import Header from "../components/Header";
+import InfoCard from "../components/InfoCard";
+import MapSection from "../components/MapSection";
 
-function Search() {
+function Search({ searchResults }) {
+  const lat = "30.089726"
+  const lng = "31.638698"
+  console.log("searchResults", searchResults);
+  const showInMapClicked = () => {
+    window.open("https://maps.google.com?q="+lat+","+lng );
+  };
   const router = useRouter();
   const { location, startDate, endDate, noOfGuests } = router.query;
   const formattedStartDate = format(new Date(startDate), "dd MMMM yy");
@@ -14,7 +22,7 @@ function Search() {
   // console.log("formattedStartDate",formattedStartDate)
   return (
     <div>
-      <Header />
+      <Header placeholder={`${location} | ${range} | ${noOfGuests} guests`} />
       <main>
         <section className="flex-grow pt-14 px-6">
           <p className="text-xs">
@@ -30,6 +38,15 @@ function Search() {
             <p className="button">Rooms and Beds</p>
             <p className="button">More Filters</p>
           </div>
+          {searchResults.map((item) => (
+            <InfoCard item={item} key={item.img} />
+          ))}
+        </section>
+        <section>
+          <button onClick={showInMapClicked}>Map Google</button>
+        </section>
+        <section>
+          <MapSection/>
         </section>
       </main>
 
@@ -39,3 +56,14 @@ function Search() {
 }
 
 export default Search;
+
+export async function getServerSideProps() {
+  const searchResults = await fetch("https://www.jsonkeeper.com/b/5NPS").then(
+    (res) => res.json()
+  );
+  return {
+    props: {
+      searchResults,
+    },
+  };
+}
